@@ -11,29 +11,45 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * Service for Module A – Facilities & Assets Catalogue.
- * Handles CRUD and search/filter operations on resources.
+ * Service Implementation for Module A – Facilities & Assets Catalogue.
+ * Implements ResourceServiceInterface for clean architecture.
+ *
+ * Author: Member 1
+ * Handles: CRUD operations + search + filtering
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ResourceService {
+public class ResourceService implements ResourceServiceInterface {
 
     private final ResourceRepository resourceRepository;
 
+    // ====================================================
+    // READ
+    // ====================================================
+
     /** Get all resources */
+    @Override
     public List<Resource> getAllResources() {
+        log.debug("Fetching all resources");
         return resourceRepository.findAll();
     }
 
-    /** Get resource by ID */
+    /** Get single resource by ID — throws 404 if not found */
+    @Override
     public Resource getResourceById(String id) {
         return resourceRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Resource not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Resource not found with id: " + id));
     }
 
+    // ====================================================
+    // CREATE
+    // ====================================================
+
     /** Create a new resource (Admin only) */
-    public Resource createResource(ResourceDTO dto) {
+    @Override
+    public Resource addResource(ResourceDTO dto) {
         Resource resource = Resource.builder()
                 .name(dto.getName())
                 .type(dto.getType())
@@ -49,7 +65,17 @@ public class ResourceService {
         return resourceRepository.save(resource);
     }
 
+    // keep backward-compatible alias used by controller
+    public Resource createResource(ResourceDTO dto) {
+        return addResource(dto);
+    }
+
+    // ====================================================
+    // UPDATE
+    // ====================================================
+
     /** Update an existing resource (Admin only) */
+    @Override
     public Resource updateResource(String id, ResourceDTO dto) {
         Resource existing = getResourceById(id);
         existing.setName(dto.getName());
@@ -65,15 +91,41 @@ public class ResourceService {
         return resourceRepository.save(existing);
     }
 
+    // ====================================================
+    // DELETE
+    // ====================================================
+
     /** Delete a resource (Admin only) */
+    @Override
     public void deleteResource(String id) {
         Resource existing = getResourceById(id);
         log.info("Deleting resource: {}", id);
         resourceRepository.delete(existing);
     }
 
-    /** Search resources by type, capacity, location */
-    public List<Resource> searchResources(Resource.ResourceType type,
+    // ====================================================
+    // SEARCH & FILTER
+    // ====================================================
+
+    /**
+     * Keyword search — searches name OR location (case-insensitive).
+     * Used by GET /api/resources/search?keyword=xxx
+     */
+    @Override
+    public List<Resource> searchResources(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return resourceRepository.findAll();
+        }
+        return resourceRepository
+                .findByNameContainingIgnoreCaseOrLocationContainingIgnoreCase(keyword, keyword);
+    }
+
+    /**
+     * Advanced filter — by type, capacity, location, status.
+     * Used by GET /api/resources?type=&minCapacity=&location=&status=
+     */
+    @Override
+    public List<Resource> filterResources(Resource.ResourceType type,
                                           Integer minCapacity,
                                           String location,
                                           Resource.ResourceStatus status) {
@@ -93,5 +145,13 @@ public class ResourceService {
             return resourceRepository.findByStatus(status);
         }
         return resourceRepository.findAll();
+    }
+
+    // keep old method signature for existing controller calls
+    public List<Resource> searchResources(Resource.ResourceType type,
+                                          Integer minCapacity,
+                                          String location,
+                                          Resource.ResourceStatus status) {
+        return filterResources(type, minCapacity, location, status);
     }
 }
