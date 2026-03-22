@@ -1,0 +1,38 @@
+# ==========================================
+# Smart Campus - .gitignore
+# ==========================================
+
+# ====== Backend (Maven / Java) ======
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+*.class
+*.jar
+*.war
+*.ear
+*.log
+*.tmp
+.DS_Store
+
+# Spring Boot uploads
+backend/uploads/
+
+# ====== Frontend (Node / Vite) ======
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+.eslintcache
+
+# ====== IDEs ======
+.idea/
+.vscode/
+*.iml
+*.suo
+*.user
+*.swp
+*.swo
+
+# ====== OS ======
+Thumbs.db
+.DS_Store
