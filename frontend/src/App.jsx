@@ -8,6 +8,8 @@ import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import ResourcesPage from './pages/ResourcesPage'
 import ResourceDetailPage from './pages/ResourceDetailPage'
+import AddResourcePage from './pages/AddResourcePage'
+import EditResourcePage from './pages/EditResourcePage'
 import BookingsPage from './pages/BookingsPage'
 import TicketsPage from './pages/TicketsPage'
 import TicketDetailPage from './pages/TicketDetailPage'
@@ -35,7 +37,9 @@ function App() {
       <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/resources" element={<ResourcesPage />} />
+        <Route path="/resources/new" element={<AddResourcePage />} />
         <Route path="/resources/:id" element={<ResourceDetailPage />} />
+        <Route path="/resources/:id/edit" element={<EditResourcePage />} />
         <Route path="/bookings" element={<BookingsPage />} />
         <Route path="/tickets" element={<TicketsPage />} />
         <Route path="/tickets/:id" element={<TicketDetailPage />} />
